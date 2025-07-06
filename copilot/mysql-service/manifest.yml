@@ -2,7 +2,7 @@ name: mysql-service
 type: Backend Service
 
 image:
-  location: mysql:5.7
+  build: Dockerfile.mysql
   port: 3306
 
 variables:
@@ -16,3 +16,14 @@ count: 1
 
 network:
   connect: true
+
+storage:
+  volumes:
+    mysql-data:
+      efs: true
+      path: /var/lib/mysql
+      read_only: false
+
+mount_points:
+  - source_volume: mysql-data
+    container_path: /var/lib/mysql
