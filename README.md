@@ -21,6 +21,12 @@ This project showcases a basic LAMP (Linux, Apache, MySQL, PHP) stack applicatio
 - **Load Balancer:** Application Load Balancer
 - **Deployment Tool:** AWS Copilot CLI
 
+## Solution Architecture
+
+**Path:** `solutions architecture/copilot ecs lamp stack.png`
+![Solution Architecture](solutions%20architecture/copilot%20ecs%20lamp%20stack.png)
+*Complete AWS solution architecture showing the LAMP stack deployment on ECS using Copilot CLI, including VPC, subnets, load balancer, ECS services, and EFS storage for MySQL persistence.*
+
 ## Deployment Journey & Challenges
 
 ### Initial Setup
