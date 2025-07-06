@@ -4,8 +4,9 @@ A simple PHP LAMP application deployed to Amazon ECS using AWS Copilot CLI, demo
 
 ## Repository & Live Demo
 
-- **GitHub Repository:** [Add your repository URL here]
-- **Live Application:** [Add your live URL here] *(Note: This link may become unavailable after deployment teardown)*
+- **GitHub Repository:** [github repo](https://github.com/mr-robertamoah/lamp-ecs-app)
+- **Live Application:** [live link](http://lampst-Publi-gFS0KVMxLve8-364471546.eu-west-1.elb.amazonaws.com)
+*Note: This link may become unavailable after deployment teardown*
 
 ## Project Overview
 
@@ -24,7 +25,7 @@ This project showcases a basic LAMP (Linux, Apache, MySQL, PHP) stack applicatio
 
 ### Initial Setup
 1. **Local Development:** Started with `docker-compose.yml` for local testing
-2. **Containerization:** Created `Dockerfile` with PHP 7.4-Apache and MySQLi extension
+2. **Containerization:** Created `Dockerfile` with PHP 7.4-Apache and MySQLi extension and `Dockerfile.mysql` with mysql:5.7 
 3. **Copilot Initialization:** Used `copilot app init` and `copilot svc init` to scaffold the deployment
 
 ### Database Connection Challenges
@@ -37,7 +38,7 @@ This project showcases a basic LAMP (Linux, Apache, MySQL, PHP) stack applicatio
 #### Challenge 2: Connection Refused (127.0.0.1)
 - **Issue:** PHP tried connecting to `127.0.0.1:3306` but MySQL wasn't available
 - **Root Cause:** Could not find root cause
-- **Solution:** Implemented environment variables and updated connection logic
+- **Solution:** Implemented environment variables and updated connection logic and finally switched to the use of `mysql-service`
 
 ### Deployment Evolution
 
@@ -74,6 +75,7 @@ lamp-ecs-app/
 │   └── mysql-service/
 │       └── manifest.yml  # Backend MySQL service
 ├── Dockerfile            # Container definition
+├── Dockerfile.msql       # Container definition
 ├── docker-compose.yml    # Local development
 └── README.md
 ```
@@ -200,6 +202,31 @@ lamp-ecs-app/
 ![ECR Repositories](screenshots/24%20showing%20ecr%20repositories.png)
 *Amazon ECR repositories containing the deployed application images.*
 
+### MySQL Service EFS Volume Setup
+**Path:** `screenshots/25 reploying mysql service after setting it up to use efs volume.png`
+![MySQL EFS Setup](screenshots/25%20reploying%20mysql%20service%20after%20setting%20it%20up%20to%20use%20efs%20volume.png)
+*Redeploying MySQL service after configuring EFS volume for data persistence.*
+
+### Testing Data Persistence
+**Path:** `screenshots/26 testing persistence of data in mysql service.png`
+![Testing Persistence](screenshots/26%20testing%20persistence%20of%20data%20in%20mysql%20service.png)
+*Testing MySQL data persistence with EFS volume to ensure data survives container restarts.*
+
+### Application After MySQL EFS Update
+**Path:** `screenshots/27 viewing application after update to mysql service.png`
+![App After MySQL Update](screenshots/27%20viewing%20application%20after%20update%20to%20mysql%20service.png)
+*Viewing the application after updating MySQL service with EFS volume configuration.*
+
+### Redeploying with Styling Updates
+**Path:** `screenshots/28 redeploying lamstack service after making changes to styling.png`
+![Styling Update Deploy](screenshots/28%20redeploying%20lamstack%20service%20after%20making%20changes%20to%20styling.png)
+*Redeploying the lampstack service after making UI styling improvements.*
+
+### Final Styled Application
+**Path:** `screenshots/29 viewing application after redeploying lampstack service.png`
+![Final Styled App](screenshots/29%20viewing%20application%20after%20redeploying%20lampstack%20service.png)
+*Final application with improved styling, showing the modern UI with gradient backgrounds and enhanced user experience.*
+
 ## Key Configuration Files
 
 ### Dockerfile
@@ -222,7 +249,7 @@ image:
 network:
   connect: true
 variables:
-  DB_HOST: mysql-service
+  DB_HOST: mysql-service.production.lampstack-app.local
   DB_PORT: 3306
   DB_USER: root
   DB_PASSWORD: rootpassword
@@ -241,6 +268,15 @@ variables:
   MYSQL_DATABASE: lampdb
 network:
   connect: true
+storage:
+  volumes:
+    mysql-data:
+      efs: true
+      path: /var/lib/mysql
+      read_only: false
+mount_points:
+  - source_volume: mysql-data
+    container_path: /var/lib/mysql
 ```
 
 ## Deployment Commands
@@ -249,27 +285,23 @@ network:
 # Initialize application
 copilot app init lampstack-app
 
-# Initialize service
+# Initialize services
 copilot svc init lampstack-app-service
+copilot svc init mysql-service
 
-# Deploy environment
-copilot env init --name production
-copilot env deploy --name production
+# Deploy mysql service with EFS persistence
+copilot svc deploy --name mysql-service --env production
 
 # Deploy app service
 copilot svc deploy --name lampstack-app-service --env production
-
-# Deploy mysql service
-copilot svc deploy --name mysql-service --env production
 ```
 
 ## Possible Improvements
 
-### 1. Database Persistence with EFS
-- **Current State:** MySQL data is ephemeral and lost on container restart
-- **Improvement:** Attach Amazon EFS volume to MySQL container
+### 1. Database Persistence with EFS ✅ IMPLEMENTED
+- **Current State:** MySQL data persists across container restarts using EFS volume
+- **Implementation:** EFS volume mounted to `/var/lib/mysql` in MySQL container
 - **Benefits:** Data persistence, backup capabilities, shared storage
-- **Implementation:** Add EFS mount points in Copilot manifest
 
 ### 2. Amazon RDS Integration
 - **Current State:** MySQL runs as separate Backend Service
