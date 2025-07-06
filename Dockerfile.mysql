@@ -1,0 +1,13 @@
+FROM mysql:5.7
+
+# Switch to root to fix permissions during build
+USER root
+
+# Ensure /var/lib/mysql has correct ownership
+RUN mkdir -p /var/lib/mysql && chown -R mysql:mysql /var/lib/mysql
+
+# Back to default user (MySQL image will do this itself too)
+USER 999
+
+# Default MySQL entrypoint will be used
+EXPOSE 3306
