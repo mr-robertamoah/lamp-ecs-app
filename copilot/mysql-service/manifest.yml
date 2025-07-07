@@ -6,8 +6,10 @@ image:
   port: 3306
 
 variables:
-  MYSQL_ROOT_PASSWORD: rootpassword
   MYSQL_DATABASE: lampdb
+
+secrets:
+  MYSQL_ROOT_PASSWORD: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/MYSQL_ROOT_PASSWORD
 
 port: 3306
 cpu: 256
